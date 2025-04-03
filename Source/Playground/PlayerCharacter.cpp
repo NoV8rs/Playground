@@ -1,4 +1,7 @@
 #include "PlayerCharacter.h"
+#include "Gun.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/World.h"
 #include "HAL/Platform.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -16,7 +19,27 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	SpawnGun();
 }
+
+void APlayerCharacter::SpawnGun()
+{
+	if (PlayerGun)
+	{
+		Gun = GetWorld()->SpawnActor<AGun>(PlayerGun, GetActorLocation(), GetActorRotation());
+		if (Gun)
+		{
+			Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GripPoint"));
+			Gun->SetOwner(this);
+			UE_LOG(LogTemp, Warning, TEXT("Gun spawned and attached: %s"), *Gun->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn gun"));
+		}
+	}
+}
+
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
@@ -36,6 +59,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::Fire);
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -92,6 +116,18 @@ void APlayerCharacter::DestroyActor()
 			}
 		}
 		SpawnedActors.Empty();
+	}
+}
+
+void APlayerCharacter::Fire()
+{
+	if (Gun)
+	{
+		Gun->Fire();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Gun is not spawned or attached"));
 	}
 }
 

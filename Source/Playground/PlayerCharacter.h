@@ -20,7 +20,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerCharacter")
 	void DestroyActor();
-	
+
 	UPROPERTY(EditAnywhere, Category = "PlayerCharacter")
 	float MaxHealth = 100.0f;
 
@@ -32,6 +32,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FTransform spawnLocation;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerCharacter")
+	TSubclassOf<class AGun> PlayerGun;
 
 protected:
 	// Called when the game starts or when spawned
@@ -47,8 +50,11 @@ public:
 	void MoveRight(float value);
 	void Turn(float value);
 	void LookUp(float value);
+	void Fire();
 
 private:
 	TArray<AActor*> SpawnedActors;
+	AGun* Gun;
 
+	void SpawnGun();
 };
